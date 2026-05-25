@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AgroSense · Irrigation Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-deep:  #0a2e1a;
+    --green-mid:   #14532d;
+    --green-soft:  #166534;
+    --green-glow:  #22c55e;
+    --green-pale:  #dcfce7;
+    --amber:       #f59e0b;
+    --amber-pale:  #fef3c7;
+    --amber-dark:  #92400e;
+    --red:         #ef4444;
+    --red-pale:    #fee2e2;
+    --red-dark:    #991b1b;
+    --blue:        #3b82f6;
+    --blue-pale:   #dbeafe;
+    --blue-dark:   #1d4ed8;
+    --cream:       #fafaf7;
+    --ink:         #0f1f13;
+    --muted:       #4b6355;
+    --border:      #d1fae5;
+    --card-bg:     #ffffff;
+    --shadow:      0 4px 32px rgba(10,46,26,.09);
+    --shadow-lg:   0 16px 64px rgba(10,46,26,.16);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* orbs */
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(90px);
+    opacity: .16;
+  }
+  body::before {
+    width: 620px; height: 620px;
+    background: radial-gradient(circle, #22c55e, transparent 70%);
+    top: -180px; left: -180px;
+  }
+  body::after {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, #86efac, transparent 70%);
+    bottom: -140px; right: -140px;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative; z-index: 10;
+    padding: 1.8rem 2rem 0;
+    max-width: 980px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    display: flex; align-items: center; gap: .6rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.35rem;
+    color: var(--green-mid); letter-spacing: -.02em;
+    text-decoration: none;
+  }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--green-mid);
+    border-radius: 10px;
+    display: grid; place-items: center; font-size: 1.1rem;
+  }
+  .nav-links { display: flex; align-items: center; gap: .75rem; }
+  .nav-link {
+    font-size: .82rem; color: var(--muted); text-decoration: none;
+    padding: .35rem .8rem; border-radius: 8px;
+    transition: background .15s, color .15s;
+  }
+  .nav-link:hover { background: var(--green-pale); color: var(--green-soft); }
+  .badge-model {
+    font-size: .72rem; font-weight: 500;
+    background: var(--green-pale); color: var(--green-soft);
+    padding: .3rem .75rem; border-radius: 999px;
+    border: 1px solid var(--border); letter-spacing: .04em;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    position: relative; z-index: 10;
+    max-width: 980px; margin: 0 auto;
+    padding: 3rem 2rem 2rem; text-align: center;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-size: .73rem; font-weight: 500;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--green-glow); margin-bottom: 1rem;
+  }
+  .hero-tag::before, .hero-tag::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(to right, transparent, #86efac);
+    width: 30px;
+  }
+  .hero-tag::after { background: linear-gradient(to left, transparent, #86efac); }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800; line-height: 1.08;
+    color: var(--green-deep); letter-spacing: -.03em;
+    max-width: 680px; margin: 0 auto .9rem;
+  }
+  .hero h1 span { color: var(--green-glow); }
+  .hero p {
+    font-size: 1.02rem; color: var(--muted);
+    max-width: 500px; margin: 0 auto;
+    line-height: 1.7; font-weight: 300;
+  }
+
+  /* ── Card ── */
+  .card-wrap {
+    position: relative; z-index: 10;
+    max-width: 800px; margin: 2.5rem auto 0;
+    padding: 0 1.5rem;
+  }
+  .card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    border: 1px solid #e7f5ec;
+  }
+  .card-header {
+    background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-soft) 100%);
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-header-left h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem; font-weight: 700;
+    color: #fff; letter-spacing: -.01em;
+  }
+  .card-header-left p { font-size: .8rem; color: #86efac; margin-top: .15rem; }
+  .card-header-dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; opacity: .5; }
+  .dot.r { background: #ef4444; }
+  .dot.y { background: #f59e0b; }
+  .dot.g { background: #22c55e; }
+
+  /* ── Form ── */
+  .form-body { padding: 2rem 2rem 1.25rem; }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem;
+  }
+  @media(max-width:580px){ .form-grid{ grid-template-columns:1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: .5rem; }
+  .field.full { grid-column: 1/-1; }
+
+  label {
+    font-size: .76rem; font-weight: 500;
+    color: var(--muted); letter-spacing: .05em;
+    text-transform: uppercase;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  label .licon { font-size: .95rem; }
+  label .unit {
+    font-weight: 400; font-size: .7rem;
+    background: var(--green-pale); color: var(--green-soft);
+    padding: .1rem .5rem; border-radius: 4px; margin-left: auto;
+  }
+
+  input[type=number], input[type=text], select {
+    width: 100%; padding: .75rem 1rem;
+    border: 1.5px solid #e0ede5; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem; color: var(--ink);
+    background: #f8fdf9;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    outline: none; -webkit-appearance: none;
+  }
+  input[type=number]:focus, select:focus {
+    border-color: var(--green-glow);
+    box-shadow: 0 0 0 3px rgba(34,197,94,.12);
+    background: #fff;
+  }
+  input::placeholder { color: #aac0b0; }
+
+  /* slider */
+  .slider-wrap { position: relative; padding-top: 1.6rem; }
+  .slider-display {
+    position: absolute; top: 0; right: 0;
+    font-size: .82rem; font-weight: 600;
+    color: var(--green-soft);
+    background: var(--green-pale);
+    padding: .1rem .55rem; border-radius: 6px;
+  }
+  input[type=range] {
+    width: 100%; padding: 0; height: 6px; cursor: pointer;
+    background: linear-gradient(to right, var(--green-glow) var(--pct,33%), #d1fae5 var(--pct,33%));
+    border: none; border-radius: 999px; outline: none;
+    -webkit-appearance: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--green-mid);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(10,46,26,.28);
+    cursor: pointer;
+  }
+  input[type=range]:focus { border: none; box-shadow: none; }
+
+  /* select */
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾'; position: absolute; right: 1rem; top: 50%;
+    transform: translateY(-50%); color: var(--muted);
+    font-size: .85rem; pointer-events: none;
+  }
+  .select-wrap select { padding-right: 2.2rem; cursor: pointer; }
+
+  /* ── Buttons ── */
+  .submit-row {
+    padding: 1.25rem 2rem 2rem;
+    display: flex; gap: .85rem;
+  }
+  .btn-predict {
+    flex: 1; padding: .95rem 1.5rem;
+    background: linear-gradient(135deg, var(--green-mid), var(--green-glow));
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: .98rem; font-weight: 700; letter-spacing: .02em;
+    border: none; border-radius: 14px; cursor: pointer;
+    transition: transform .15s, box-shadow .15s, opacity .15s;
+    box-shadow: 0 6px 24px rgba(22,101,52,.32);
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+  }
+  .btn-predict:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(22,101,52,.42); }
+  .btn-predict:active { transform: translateY(0); }
+  .btn-predict:disabled { opacity: .55; transform: none; cursor: not-allowed; }
+
+  .btn-reset {
+    padding: .95rem 1.25rem;
+    background: transparent; border: 1.5px solid var(--border);
+    border-radius: 14px; color: var(--muted);
+    font-family: 'DM Sans', sans-serif; font-size: .9rem;
+    cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+    display: flex; align-items: center; gap: .4rem;
+  }
+  .btn-reset:hover { background: var(--green-pale); color: var(--green-soft); border-color: var(--green-glow); }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin .7s linear infinite; display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Error ── */
+  .error-msg {
+    display: none; margin: 0 2rem 1rem;
+    padding: .8rem 1rem;
+    background: var(--red-pale); border: 1.5px solid #fca5a5;
+    border-radius: 10px; color: var(--red-dark); font-size: .85rem;
+    display: none; align-items: center; gap: .5rem;
+  }
+  .error-msg.show { display: flex; }
+
+  /* ── Result ── */
+  #result {
+    margin: 0 2rem 1.5rem;
+    display: none;
+    animation: slideUp .4s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+  .result-inner {
+    border: 1.5px solid; border-radius: 18px;
+    overflow: hidden;
+  }
+  .result-inner.low    { border-color: #93c5fd; }
+  .result-inner.medium { border-color: #fcd34d; }
+  .result-inner.high   { border-color: #fca5a5; }
+
+  .result-top {
+    display: flex; align-items: flex-start; gap: 1.2rem;
+    padding: 1.5rem;
+  }
+  .result-inner.low    .result-top { background: var(--blue-pale); }
+  .result-inner.medium .result-top { background: var(--amber-pale); }
+  .result-inner.high   .result-top { background: var(--red-pale); }
+
+  .result-emoji { font-size: 2.8rem; line-height: 1; flex-shrink: 0; }
+  .result-body { flex: 1; }
+  .result-label {
+    font-size: .68rem; font-weight: 500;
+    letter-spacing: .1em; text-transform: uppercase; opacity: .6; margin-bottom: .2rem;
+  }
+  .result-need {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem; font-weight: 800;
+    letter-spacing: -.02em; line-height: 1; margin-bottom: .45rem;
+  }
+  .result-inner.low    .result-need { color: var(--blue-dark); }
+  .result-inner.medium .result-need { color: var(--amber-dark); }
+  .result-inner.high   .result-need { color: var(--red-dark); }
+
+  .result-tip { font-size: .87rem; line-height: 1.6; color: var(--muted); }
+
+  /* confidence bar */
+  .result-conf-row {
+    padding: 1rem 1.5rem;
+    background: #fff; display: flex; align-items: center; gap: 1rem;
+  }
+  .conf-label { font-size: .75rem; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .conf-track {
+    flex: 1; height: 7px; background: #e5e7eb;
+    border-radius: 999px; overflow: hidden;
+  }
+  .conf-fill {
+    height: 100%; border-radius: 999px;
+    transition: width .7s cubic-bezier(.22,1,.36,1);
+  }
+  .result-inner.low    .conf-fill { background: var(--blue); }
+  .result-inner.medium .conf-fill { background: var(--amber); }
+  .result-inner.high   .conf-fill { background: var(--red); }
+  .conf-pct { font-size: .82rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
+
+  /* probability pills row */
+  .proba-row {
+    display: flex; gap: .6rem; padding: .85rem 1.5rem;
+    background: #f8fdf9; border-top: 1px solid #e7f5ec;
+    flex-wrap: wrap;
+  }
+  .proba-pill {
+    display: flex; align-items: center; gap: .4rem;
+    font-size: .78rem; font-weight: 500;
+    padding: .28rem .75rem; border-radius: 999px; border: 1px solid;
+  }
+  .proba-pill.low    { background: var(--blue-pale);  border-color: #93c5fd; color: var(--blue-dark); }
+  .proba-pill.medium { background: var(--amber-pale); border-color: #fcd34d; color: var(--amber-dark); }
+  .proba-pill.high   { background: var(--red-pale);   border-color: #fca5a5; color: var(--red-dark); }
+  .proba-pill .dot-s { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .proba-pill.low    .dot-s { background: var(--blue); }
+  .proba-pill.medium .dot-s { background: var(--amber); }
+  .proba-pill.high   .dot-s { background: var(--red); }
+
+  /* ── Info strip ── */
+  .info-strip {
+    position: relative; z-index: 10;
+    max-width: 800px; margin: 2.5rem auto 0;
+    padding: 0 1.5rem;
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem;
+  }
+  @media(max-width:580px){ .info-strip{ grid-template-columns:1fr; } }
+
+  .info-tile {
+    background: var(--card-bg);
+    border: 1px solid #e7f5ec; border-radius: 16px;
+    padding: 1.25rem; box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .info-tile:hover { transform: translateY(-3px); box-shadow: 0 8px 40px rgba(10,46,26,.12); }
+  .info-tile-icon { font-size: 1.5rem; margin-bottom: .55rem; }
+  .info-tile h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: .92rem; font-weight: 700;
+    color: var(--green-deep); margin-bottom: .3rem;
+  }
+  .info-tile p { font-size: .79rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── Footer ── */
+  footer {
+    position: relative; z-index: 10;
+    text-align: center;
+    padding: 2.5rem 1.5rem 2rem;
+    font-size: .77rem; color: var(--muted);
+    margin-top: 3rem;
+    border-top: 1px solid #e7f5ec;
+  }
+  footer a { color: var(--green-soft); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <a class="logo" href="/">
+    <div class="logo-mark">🌱</div>
+    AgroSense
+  </a>
+  <nav class="nav-links">
+    <a class="nav-link" href="/docs">API Docs</a>
+    <a class="nav-link" href="/health">Health</a>
+    <span class="badge-model">Random Forest · v1.0</span>
+  </nav>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-tag">AI-powered precision agriculture</div>
+  <h1>Smart <span>Irrigation</span><br/>Need Predictor</h1>
+  <p>Enter your field conditions below and get an instant AI-powered irrigation recommendation backed by machine learning.</p>
+</section>
+
+<!-- Main card -->
+<div class="card-wrap">
+  <div class="card">
+
+    <div class="card-header">
+      <div class="card-header-left">
+        <h2>🌾 Field Conditions Input</h2>
+        <p>All fields required · Real-time prediction</p>
+      </div>
+      <div class="card-header-dots">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      </div>
+    </div>
+
+    <div class="form-body">
+      <div class="form-grid">
+
+        <!-- Soil Moisture — slider -->
+        <div class="field">
+          <label for="soil_moisture">
+            <span class="licon">💧</span> Soil Moisture
+            <span class="unit">%</span>
+          </label>
+          <div class="slider-wrap">
+            <span class="slider-display" id="sm-val">33%</span>
+            <input type="range" id="soil_moisture" min="0" max="100" step="0.5" value="33"
+                   oninput="updateSlider(this,'sm-val','%')"/>
+          </div>
+        </div>
+
+        <!-- Temperature — number -->
+        <div class="field">
+          <label for="temperature_c">
+            <span class="licon">🌡️</span> Temperature
+            <span class="unit">°C</span>
+          </label>
+          <input type="number" id="temperature_c" placeholder="e.g. 28.5"
+                 step="0.1" min="-10" max="60" required/>
+        </div>
+
+        <!-- Wind Speed — number -->
+        <div class="field">
+          <label for="wind_speed_kmh">
+            <span class="licon">💨</span> Wind Speed
+            <span class="unit">km/h</span>
+          </label>
+          <input type="number" id="wind_speed_kmh" placeholder="e.g. 16.8"
+                 step="0.1" min="0" max="200" required/>
+        </div>
+
+        <!-- Rainfall — number -->
+        <div class="field">
+          <label for="rainfall_mm">
+            <span class="licon">🌧️</span> Rainfall
+            <span class="unit">mm</span>
+          </label>
+          <input type="number" id="rainfall_mm" placeholder="e.g. 5.0"
+                 step="0.1" min="0" max="2000" required/>
+        </div>
+
+        <!-- Crop Growth Stage — select -->
+        <div class="field full">
+          <label for="crop_growth_stage">
+            <span class="licon">🌿</span> Crop Growth Stage
+          </label>
+          <div class="select-wrap">
+            <select id="crop_growth_stage" required>
+              <option value="" disabled selected>Select growth stage…</option>
+              {% for stage in crop_stages %}
+              <option value="{{ stage }}">{{ stage }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-msg" id="error-msg">
+      <span>⚠️</span><span id="error-text">Please fill in all fields before predicting.</span>
+    </div>
+
+    <!-- Result -->
+    <div id="result"></div>
+
+    <!-- Buttons -->
+    <div class="submit-row">
+      <button class="btn-predict" id="submit-btn" onclick="submitForm()">
+        <span id="btn-text">🔍 Predict Irrigation Need</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+      <button class="btn-reset" onclick="resetForm()">↺ Reset</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Info tiles -->
+<div class="info-strip">
+  <div class="info-tile">
+    <div class="info-tile-icon">🧠</div>
+    <h3>Random Forest Model</h3>
+    <p>Trained on thousands of field records with SMOTE balancing for reliable predictions across all crop stages.</p>
+  </div>
+  <div class="info-tile">
+    <div class="info-tile-icon">⚡</div>
+    <h3>Real-time Results</h3>
+    <p>Get instant predictions under 200ms. Powered by FastAPI and deployed on Render for 99.9% uptime.</p>
+  </div>
+  <div class="info-tile">
+    <div class="info-tile-icon">🌾</div>
+    <h3>3 Precision Levels</h3>
+    <p>Low, Medium, and High irrigation recommendations with actionable guidance for each prediction.</p>
+  </div>
+</div>
+
+<footer>
+  Built with <a href="/docs">FastAPI</a> · scikit-learn · Random Forest &nbsp;·&nbsp; Deployed on Render
+</footer>
+
+<script>
+const TIPS = {
+  Low:    "Soil moisture is adequate — hold off watering to avoid root rot and nutrient leaching. Monitor forecasts and resume only if no rain is expected within 48 hours.",
+  Medium: "Apply a moderate irrigation cycle (30–50% field capacity top-up). Prefer drip or micro-sprinkler systems to minimise evaporation. Check for early wilting signs in the morning.",
+  High:   "Immediate irrigation is critical — start a full-cycle watering session now. Irrigate in early morning to reduce heat stress. Consider mulching around roots to retain moisture after watering."
+};
+const EMOJIS  = { Low: "💧", Medium: "🌦️", High: "🚿" };
+const CLASSES = { Low: "low", Medium: "medium", High: "high" };
+
+function updateSlider(el, valId, unit) {
+  const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+  el.style.setProperty('--pct', pct + '%');
+  document.getElementById(valId).textContent = parseFloat(el.value).toFixed(1) + unit;
+}
+updateSlider(document.getElementById('soil_moisture'), 'sm-val', '%');
+
+async function submitForm() {
+  const btn     = document.getElementById('submit-btn');
+  const txt     = document.getElementById('btn-text');
+  const spinner = document.getElementById('spinner');
+  const errDiv  = document.getElementById('error-msg');
+  const errTxt  = document.getElementById('error-text');
+  const resDiv  = document.getElementById('result');
+
+  errDiv.classList.remove('show');
+  resDiv.style.display = 'none';
+
+  const temp  = document.getElementById('temperature_c').value;
+  const wind  = document.getElementById('wind_speed_kmh').value;
+  const rain  = document.getElementById('rainfall_mm').value;
+  const stage = document.getElementById('crop_growth_stage').value;
+
+  if (!temp || !wind || !rain || !stage) {
+    errTxt.textContent = 'Please fill in all fields before predicting.';
+    errDiv.classList.add('show'); return;
+  }
+
+  btn.disabled = true;
+  txt.textContent = 'Analysing…'; spinner.style.display = 'block';
+
+  try {
+    const payload = {
+      soil_moisture:     parseFloat(document.getElementById('soil_moisture').value),
+      temperature_c:     parseFloat(temp),
+      wind_speed_kmh:    parseFloat(wind),
+      rainfall_mm:       parseFloat(rain),
+      crop_growth_stage: stage
+    };
+
+    const resp = await fetch('/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) { const e = await resp.json(); throw new Error(e.detail || 'Server error'); }
+    const data = await resp.json();
+    showResult(data);
+
+  } catch (err) {
+    errTxt.textContent = 'Error: ' + err.message;
+    errDiv.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    txt.textContent = '🔍 Predict Irrigation Need';
+    spinner.style.display = 'none';
+  }
+}
+
+function showResult(data) {
+  const div = document.getElementById('result');
+  const cls = CLASSES[data.prediction];
+  const pct = Math.round(data.confidence * 100);
+  const proba = data.probabilities;
+
+  div.innerHTML = `
+    <div class="result-inner ${cls}">
+      <div class="result-top">
+        <div class="result-emoji">${EMOJIS[data.prediction]}</div>
+        <div class="result-body">
+          <div class="result-label">Irrigation Need</div>
+          <div class="result-need">${data.prediction}</div>
+          <div class="result-tip">${TIPS[data.prediction]}</div>
+        </div>
+      </div>
+      <div class="result-conf-row">
+        <span class="conf-label">Model confidence</span>
+        <div class="conf-track"><div class="conf-fill" id="conf-fill" style="width:0%"></div></div>
+        <span class="conf-pct">${pct}%</span>
+      </div>
+      <div class="proba-row">
+        <div class="proba-pill low">
+          <div class="dot-s"></div> Low &nbsp;<strong>${Math.round(proba.Low*100)}%</strong>
+        </div>
+        <div class="proba-pill medium">
+          <div class="dot-s"></div> Medium &nbsp;<strong>${Math.round(proba.Medium*100)}%</strong>
+        </div>
+        <div class="proba-pill high">
+          <div class="dot-s"></div> High &nbsp;<strong>${Math.round(proba.High*100)}%</strong>
+        </div>
+      </div>
+    </div>`;
+
+  div.style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('conf-fill').style.width = pct + '%';
+  }, 60);
+  div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetForm() {
+  document.getElementById('temperature_c').value  = '';
+  document.getElementById('wind_speed_kmh').value = '';
+  document.getElementById('rainfall_mm').value    = '';
+  document.getElementById('crop_growth_stage').value = '';
+  document.getElementById('soil_moisture').value  = 33;
+  updateSlider(document.getElementById('soil_moisture'), 'sm-val', '%');
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('error-msg').classList.remove('show');
+}
+</script>
+</body>
+</html>
