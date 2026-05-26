@@ -40,13 +40,11 @@ The system is designed to support precision agriculture by reducing water wastag
 
 # 🖥 Application Screenshots
 ## Home Page
-![Home Page](screenshots/home_page.png)
-## Enter skills
-![Entering skills](screenshots/enter_skills.png)
-## filter process
-![filters](screenshots/filters.png)
+![Home Page](static/images/Home_page.png)
+## User Input
+![User Input](static/images/User_input.png)
 ## Final Result
-![Rsults](screenshots/recommendation_results.png)
+![Rsults](static/images/Results.png)
 
 
 ## 📂 Project Structure
@@ -56,10 +54,13 @@ agrosense/
 ├── main.py               ← FastAPI application & API routes
 ├── requirements.txt      ← Python dependencies (pinned)
 ├── render.yaml           ← Render one-click deployment config
+├── Final Pipeline.ipynb  ← Trained model
+├── train & test.csv      ← Kaggle datasets
 ├── .gitignore
 ├── model.pkl             ← ⬅ YOU add this (from your notebook)
 ├── preprocessor.pkl      ← ⬅ YOU add this (from your notebook)
 ├── static/               ← (optional) CSS / JS / images
+|   └── images.png        ← Website Interface
 └── templates/
     └── index.html        ← AgroSense web UI
 ```
@@ -125,7 +126,7 @@ pip install -r requirements.txt
 # 3. Start the server
 uvicorn main:app --reload
 
-# 4. Open http://localhost:8000
+# 4. Open http://localhost:8000/docs
 ```
 
 ---
