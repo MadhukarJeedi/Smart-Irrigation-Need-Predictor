@@ -1,7 +1,11 @@
+# Virtual Environment
+madhu/
+venv/
+env/
+
+# Python cache
 __pycache__/
 *.pyc
-*.pyo
-.env
-.DS_Store
-venv/
-.venv/
+
+# Jupyter
+.ipynb_checkpoints/
