@@ -5,6 +5,50 @@ to predict crop irrigation need — **Low / Medium / High** — from real-time f
 
 ---
 
+## 🌐 Live Demo
+
+🚀 AgroSense is deployed on Render:
+
+🔗 Live App:https://smart-irrigation-need-predictor.onrender.com
+
+## 🌱 Project Overview
+
+AgroSense is a Machine Learning-powered irrigation prediction system built to help farmers and agricultural analysts make smarter irrigation decisions based on environmental and crop conditions.
+
+The application uses a trained Random Forest Classifier to predict the irrigation requirement level — Low, Medium, or High — using important agricultural parameters such as soil moisture, temperature, rainfall, wind speed, and crop growth stage.
+
+The project is developed using FastAPI for the backend API service and includes a modern responsive web interface for real-time predictions. The trained machine learning model and preprocessing pipeline are serialized using Joblib and deployed seamlessly on Render cloud infrastructure.
+
+AgroSense provides:
+- Real-time irrigation prediction
+- Probability confidence scores
+- Interactive API documentation
+- Responsive web UI
+- Cloud deployment support
+- Production-ready ML inference pipeline
+
+This project demonstrates the complete end-to-end machine learning workflow:
+1. Data preprocessing
+2. Feature engineering
+3. Model training & evaluation
+4. Model serialization
+5. FastAPI backend development
+6. Frontend integration
+7. Cloud deployment using Render
+
+The system is designed to support precision agriculture by reducing water wastage and improving irrigation efficiency through AI-driven decision making.
+
+# 🖥 Application Screenshots
+## Home Page
+![Home Page](screenshots/home_page.png)
+## Enter skills
+![Entering skills](screenshots/enter_skills.png)
+## filter process
+![filters](screenshots/filters.png)
+## Final Result
+![Rsults](screenshots/recommendation_results.png)
+
+
 ## 📂 Project Structure
 
 ```
@@ -19,6 +63,53 @@ agrosense/
 └── templates/
     └── index.html        ← AgroSense web UI
 ```
+
+## ⚙️ Working System
+
+AgroSense uses a trained Random Forest Machine Learning model to predict crop irrigation requirements based on agricultural and environmental conditions.
+
+### 🔄 Workflow
+1. User enters field data through the web interface:
+   - Soil Moisture
+   - Temperature
+   - Wind Speed
+   - Rainfall
+   - Crop Growth Stage
+
+2. FastAPI backend receives the input data.
+
+3. The preprocessing pipeline transforms the data using:
+   - MinMaxScaler
+   - OneHotEncoder
+   - ColumnTransformer
+
+4. Processed data is passed to the trained Random Forest model.
+
+5. The model predicts the irrigation requirement:
+   - Low
+   - Medium
+   - High
+
+6. Prediction results with confidence scores are returned and displayed on the web UI in real time.
+
+---
+
+### 🌐 System Flow
+
+User Input → FastAPI Backend → Preprocessing → ML Model → Prediction → Result Display
+
+---
+
+### ☁️ Deployment Flow
+
+GitHub Repository → Render Deployment → FastAPI Server → Live Prediction System
+
+## 📊 Dataset
+
+Dataset used for training the irrigation prediction model:
+
+🔗 Kaggle Dataset:
+https://www.kaggle.com/competitions/playground-series-s6e4
 
 ---
 
@@ -122,12 +213,3 @@ Interactive docs at `/docs` (Swagger) and `/redoc`.
 
 ---
 
-## 💾 Export Artifacts (add to end of notebook)
-
-```python
-import joblib
-joblib.dump(final_model, 'model.pkl')
-joblib.dump(processer, 'preprocessor.pkl')   # your variable name in the notebook
-```
-
-Copy both files into this project root before deploying.
